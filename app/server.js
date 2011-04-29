@@ -46,7 +46,7 @@ app.configure('development', function() {
 app.get('/', function(req, res) {
     var auth = getAuth(req);
     if (auth.isAuthed()) {
-        oa.get("http://api.twitter.com/1/account/verify_credentials.json", auth.getToken(), auth.getSecret(), function(err, data) {
+        oa.get("http://api.twitter.com/1/statuses/home_timeline.json", auth.getToken(), auth.getSecret(), function(err, data) {
             util.debug(data);
             res.send("sorted");
         });
