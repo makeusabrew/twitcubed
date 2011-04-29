@@ -44,14 +44,35 @@ app.configure('development', function() {
 });
 
 app.get('/', function(req, res) {
+    res.render('index', {});
+});
+
+app.get('/tweets', function(req, res) {
+    res.header('Content-Type', 'application/json');
     var auth = getAuth(req);
+    var msg = {};
     if (auth.isAuthed()) {
-        oa.get("http://api.twitter.com/1/statuses/home_timeline.json", auth.getToken(), auth.getSecret(), function(err, data) {
-            util.debug(data);
-            res.send("sorted");
+        util.debug('requesting user\'s timeline');
+        oa.get("http://api.twitter.com/1/statuses/friends_timeline.json?count=64&include_rts=1", auth.getToken(), auth.getSecret(), function(err, data) {
+            if (err) {
+                msg = {
+                    "success": false,
+                    "message": err
+                };
+            } else {
+               msg = {
+                    "success": true,
+                    "tweets": JSON.parse(data)
+                };
+            }
+            res.send(msg);
         });
     } else {
-        res.render('index', {});
+        msg = {
+            "success": false,
+            "message": "Not Authed"
+        }
+        res.send(msg);
     }
 });
 
