@@ -1,0 +1,9 @@
+[submodule "deps/socketio"]
+	path = deps/socketio
+	url = https://github.com/LearnBoost/Socket.IO-node.git
+[submodule "deps/mongodb"]
+	path = deps/mongodb
+	url = https://github.com/christkv/node-mongodb-native.git
+[submodule "deps/oauth"]
+	path = deps/oauth
+	url = https://github.com/ciaranj/node-oauth.git

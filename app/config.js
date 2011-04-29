@@ -6,5 +6,8 @@ exports.Config = {
         consumer_key: "CbDp2nWksTPbp7McuTPf3g",
         consumer_secret: "o63UY88oxChCYPPUpebF0PGJcVNXbzpzdSLawp1Lgtg",
         callback_url: "http://twit3.dev:8124/authed"
+    },
+    session: {
+        secret: "my seret string"
     }
 };

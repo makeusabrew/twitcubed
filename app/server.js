@@ -4,7 +4,7 @@ var express = require('express'),
     RedisStore = require('connect-redis'),
 /* local dependencies */
     mongo = require(__dirname + '/../deps/mongodb/lib/mongodb'),
-    io = require(__dirname + '/../deps/socket.io/lib/socket.io'),
+    io = require(__dirname + '/../deps/socketio/lib/socket.io'),
     OAuth = require(__dirname + '/../deps/oauth/lib/oauth').OAuth,
 /* local modules */
     Config = require('./config').Config;
@@ -12,24 +12,24 @@ var express = require('express'),
 /**
  * OAuth gubbins
  */
-var oa = new OAuth(config.twitter.request_url,
-    config.twitter.access_url,
-    config.twitter.consumer_key,
-    config.twitter.consumer_secret,
+var oa = new OAuth(Config.twitter.request_url,
+    Config.twitter.access_url,
+    Config.twitter.consumer_key,
+    Config.twitter.consumer_secret,
     "1.0A",
-    config.twitter.callback_url,
+    Config.twitter.callback_url,
     "HMAC-SHA1"
 );
 
 var app = express.createServer();
 
 /**
- * config stuff
+ * Config stuff
  */
 app.configure(function() {
     // let's use redis for our sessions
     app.use(express.cookieParser());
-    app.use(express.session({secret: config.session.secret, store: new RedisStore}));
+    app.use(express.session({secret: Config.session.secret, store: new RedisStore}));
     
     app.use(express.logger());
     app.use(express.bodyParser());
@@ -44,7 +44,15 @@ app.configure('development', function() {
 });
 
 app.get('/', function(req, res) {
-    res.render('index', {});
+    var auth = getAuth(req);
+    if (auth.isAuthed()) {
+        oa.get("http://api.twitter.com/1/account/verify_credentials.json", auth.getToken(), auth.getSecret(), function(err, data) {
+            util.debug(data);
+            res.send("sorted");
+        });
+    } else {
+        res.render('index', {});
+    }
 });
 
 app.get('/auth', function(req, res) {
@@ -52,28 +60,31 @@ app.get('/auth', function(req, res) {
         if (err) { 
             return res.send("Uh oh!");
         }
-        req.session.oauth_token = oauth_token;
         req.session.oauth_token_secret = oauth_token_secret;
-        util.log("saving oauth token in session ["+req.session.oauth_token+"]");
-        res.redirect(config.twitter.auth_url+"?oauth_token="+oauth_token);
+        util.debug("saving oauth token secret in session ["+req.session.oauth_token_secret+"]");
+        res.redirect(Config.twitter.auth_url+"?oauth_token="+oauth_token);
     });
 });
 
-app.get('/authed', authState('any'), function(req, res) {
+app.get('/authed', function(req, res) {
     req.session.oauth_verifier = req.oauth_verifier;
-    util.log("using oauth token from session ["+req.session.oauth_token+"]");
-    oa.getOAuthAccessToken(req.session.oauth_token, req.session.oauth_token_secret, function (err, oauth_access_token, oauth_access_token_secret, results) {
+    util.log("using oauth token secret from session ["+req.session.oauth_token_secret+"]");
+    util.log("using oauth token from URL param ["+req.query.oauth_token+"]");
+    oa.getOAuthAccessToken(req.query.oauth_token, req.session.oauth_token_secret, function (err, oauth_access_token, oauth_access_token_secret, results) {
         if (err) {
             return res.send(err);
         }
 
         // done with session
-        req.session.oauth_token = null;
         req.session.oauth_token_secret = null;
 
         // long live the cookies!
-        res.cookie('oauth_access_token', oauth_access_token);
-        res.cookie('oauth_access_token_secret', oauth_access_token_secret);
+        util.debug("oauth_access_token ["+oauth_access_token+"] - oauth_access_token_secret ["+oauth_access_token_secret+"]");
+
+        res.cookie('auth', JSON.stringify({"token":oauth_access_token, "secret":oauth_access_token_secret}));
+
+        util.debug('written cookies');
+
         res.redirect('/');
     });
 });
@@ -98,3 +109,32 @@ function authState(authed) {
         }
     }
 }
+
+function getAuth(req) {
+    var auth = {
+        token: null,
+        secret: null
+    };
+
+    try {
+        auth = JSON.parse(req.cookies.auth);
+    } catch (e) {
+        util.debug("couldn't parse auth cookie");
+    }
+
+    return {
+        isAuthed: function() {
+            return (auth.token != null && auth.secret != null);
+        },
+
+        getToken: function() {
+            return auth.token;
+        },
+
+        getSecret: function() {
+            return auth.secret;
+        }
+    }
+}
+
+app.listen(8124);
