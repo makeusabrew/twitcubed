@@ -12,126 +12,57 @@
         <script src="/js/deps/Three.js"></script>
         <script src="/js/deps/RequestAnimationFrame.js"></script>
 
+        <script src="/js/tweet_model.js"></script>
+        <script src="/js/scene_manager.js"></script>
+
         <script>
-            //$(function() {
+            $(function() {
 
-                var camera,
-                    scene,
-                    renderer,
-                    /*
-                    geometry,
-                    material,
-                    */
-                    meshes,
-                    mousePos,
-                    SCREEN_WIDTH = 900;
-                    SCREEN_HEIGHT = 600;
+                var sceneManager = new SceneManager({
+                    "width": 900,
+                    "height": 600
+                });
+                
+                var mousePos = new THREE.Vector3(0, 0, 1);
 
-                    init();
+                sceneManager.init();
+                sceneManager.setMousePosition(mousePos);
 
-                    function init() {
-                        meshes = [];
+                $("body").mousemove(function(e) {
+                    e.preventDefault();
+                    mousePos.x = e.clientX / sceneManager.getWidth() * 2 - 1;
+                    mousePos.y = -(e.clientY / sceneManager.getHeight()) * 2 + 1;
+                    //console.log(e.clientX, e.clientY, mousePos.x, mousePos.y);
+                    sceneManager.setMousePosition(mousePos);
+                });
 
-                        camera = new THREE.Camera(50, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 10000);
-                        camera.position.z = 700;
+                $.get("/tweets", {}, function(response) {
+                    if (response.success == false) {
+                        alert(response.message);
+                        return;
+                    }
+                    console.log(response);
 
-                        mousePos = new THREE.Vector3(0, 0, 1);
+                    console.log(response.tweets.length);
 
-                        console.log(camera);
-
-                        scene = new THREE.Scene();
-
-                        renderer = new THREE.WebGLRenderer();
-
-                        renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-                        //.document.body.appendChild(renderer.domElement);
-                        $("body").append(renderer.domElement);
-                        $("body").mousemove(function(e) {
-                            e.preventDefault();
-                            mousePos.x = e.clientX / SCREEN_WIDTH * 2 - 1;
-                            mousePos.y = -(e.clientY / SCREEN_HEIGHT) * 2 + 1;
-                            //console.log(e.clientX, e.clientY, mousePos.x, mousePos.y);
-                        });
-
-                        var light = new THREE.AmbientLight(Math.random() * 0x10);
-                        scene.addLight(light);
-
-                        $.get("/tweets", {}, function(response) {
-                            if (response.success == false) {
-                                alert(response.message);
-                                return;
-                            }
-                            console.log(response);
-
-                            console.log(response.tweets.length);
-
-                            for (var i = 0; i < response.tweets.length; i++) {
-                                var tweet = response.tweets[i];
-                                var texture = new THREE.ImageUtils.loadTexture(tweet.user.profile_image_url);
-                                var geometry = new THREE.Cube(50, 50, 50);
-                                var material = new THREE.MeshBasicMaterial({ map:texture });
-                                var mesh = new THREE.Mesh(geometry, material);
-                                /*mesh.position.x = -SCREEN_WIDTH + Math.random() * SCREEN_WIDTH*2;
-                                mesh.position.y = -SCREEN_HEIGHT + Math.random() * SCREEN_HEIGHT*2;
-                                mesh.position.z = -SCREEN_HEIGHT + Math.random() * SCREEN_HEIGHT*2;
-                                */
-                                var row = Math.floor(i / 8);
-                                var col = i % 8;
-                                //console.log(col, row);
-                                mesh.position.x = (col*75) - 300;
-                                mesh.position.y = ((-row)*75) + 300;
-                                //mesh.position.z = row*30;
-                                scene.addObject(mesh);
-                                meshes.push(mesh);
-                                THREE.Collisions.colliders.push(THREE.CollisionUtils.MeshOBB(mesh));
-                            }
-
-                            animate();
-
-                        }, "json");
-
-
+                    for (var i = 0; i < response.tweets.length; i++) {
+                        var data = response.tweets[i];
+                        var tweet = sceneManager.addTweet(data);
+                        var row = Math.floor(i / 8);
+                        var col = i % 8;
+                        tweet.setPosition(col*75, (-row)*75, 1);
                     }
 
-                    function animate() {
-                        requestAnimationFrame(animate);
-                        render();
-                    }
+                    //sceneManager.animate();
+                    animate();
 
-                    function render() {
-                        for (var i = 0; i < meshes.length; i++) {
-                            var mesh = meshes[i];
-                            //mesh.rotation.x += 0.01;
-                            //mesh.rotation.y += 0.02;
-                            //mesh.rotation.y += Math.random() / 50;
-                        }
+                }, "json");
 
-                        var r = new THREE.Ray();
-                        r.origin.copy(mousePos);
-                        
-                        var matrix = camera.matrixWorld.clone();
-                        matrix.multiplySelf(THREE.Matrix4.makeInvert(camera.projectionMatrix));
-                        matrix.multiplyVector3(r.origin);
-
-                        r.direction = r.origin.clone().subSelf(camera.position);
-
-                        var c = THREE.Collisions.rayCastNearest(r);
-
-                        if (c) {
-                            //console.log(c);
-                            c.mesh.rotation.y += 0.03;
-                            c.mesh.rotation.x += 0.02;
-                        }
-
-                        //camera.position.x += 2.0;
-                        //camera.target.position.x += 2.0;
-                        camera.target.position.x = mousePos.x*100;
-                        camera.target.position.y = mousePos.y*100;
-
-                        renderer.render(scene, camera);
-                    }
-            //});
+                animate = function() {
+                    requestAnimationFrame(animate);
+                    sceneManager.render();
+                }
+            });
         </script>
     </body>
 </html>
