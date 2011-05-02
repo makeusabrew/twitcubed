@@ -23,9 +23,16 @@ SceneManager = function(options) {
 
         addTweet: function(data) {
             var tweet = new TweetModel(data);
-            _scene.addObject(tweet.getMesh());
-            _meshes.push(tweet.getMesh());
-            THREE.Collisions.colliders.push(THREE.CollisionUtils.MeshOBB(tweet.getMesh()));
+            tweet.init();
+
+            var meshes = tweet.getMeshes();
+            for (var i = 0; i < meshes.length; i++) {
+                var mesh = meshes[i];
+                _scene.addObject(mesh);
+                _meshes.push(mesh);
+                THREE.Collisions.colliders.push(THREE.CollisionUtils.MeshOBB(mesh));
+            }
+
             return tweet;
         },
 
@@ -45,6 +52,18 @@ SceneManager = function(options) {
                 //console.log(c);
                 c.mesh.rotation.y += 0.03;
                 c.mesh.rotation.x += 0.02;
+            }
+
+            if (Input.isKeyDown("UP_ARROW")) {
+                _camera.position.z --;
+            } else if (Input.isKeyDown("DOWN_ARROW")) {
+                _camera.position.z ++;
+            }
+
+            if (Input.isKeyDown("LEFT_ARROW")) {
+                _camera.target.position.x --;
+            } else if (Input.isKeyDown("RIGHT_ARROW")) {
+                _camera.target.position.x ++;
             }
 
             //_camera.target.position.x = x;

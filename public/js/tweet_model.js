@@ -1,16 +1,43 @@
 TweetModel = function(data) {
-    var _mesh,
-        _texture,
-        _geometry,
-        _material;
+        var _meshes = [];
 
-    _texture = new THREE.ImageUtils.loadTexture(data.user.profile_image_url);
-    _geometry = new THREE.Sphere(20, 20, 20);
-    _material = [
-        //new THREE.MeshBasicMaterial({color:0x000000, wireframe: true}),
-        new THREE.MeshBasicMaterial({map:_texture})
-    ];
-    _mesh = new THREE.Mesh(_geometry, _material);
+    return {
+        init: function() {
+            // balloon first
+            var texture = new THREE.ImageUtils.loadTexture(data.user.profile_image_url);
+            var geometry = new THREE.Sphere(20, 20, 20);
+            var material = [
+                new THREE.MeshBasicMaterial({map:texture})
+            ];
+            _meshes.push(new THREE.Mesh(geometry, material));
+
+            // now the rope
+
+            var lGeometry = new THREE.Geometry();
+
+            lGeometry.vertices.push(new THREE.Vertex({x:0,y:0, z:1}));
+            lGeometry.vertices.push(new THREE.Vertex({x:0,y:-50, z:1}));
+
+            var line = new THREE.Line(lGeometry, new THREE.LineBasicMaterial({color: 0x00ffff}));
+            _meshes.push(line);
+        },
+
+        setPosition: function(x, y, z) {
+            // balloon
+            _meshes[0].position.x = x;
+            _meshes[0].position.y = y;
+            _meshes[0].position.z = z;
+
+            // rope
+            _meshes[1].position.x = x + 10;
+            _meshes[1].position.y = y - 10;
+            _meshes[1].position.z = z;
+        },
+
+        getMeshes: function() {
+            return _meshes;
+        }
+    };
 
     //mesh.position.z = row*30;
     /*
@@ -23,15 +50,4 @@ TweetModel = function(data) {
     xc.fillText(tweet.text, 0, 20);
     var texture = new THREE.Texture(x);
     */
-    return {
-        setPosition: function(x, y, z) {
-            _mesh.position.x = x;
-            _mesh.position.y = y;
-            _mesh.position.z = z;
-        },
-
-        getMesh: function() {
-            return _mesh;
-        }
-    };
 };

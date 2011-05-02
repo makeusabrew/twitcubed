@@ -12,6 +12,7 @@
         <script src="/js/deps/Three.js"></script>
         <script src="/js/deps/RequestAnimationFrame.js"></script>
 
+        <script src="/js/input.js"></script>
         <script src="/js/tweet_model.js"></script>
         <script src="/js/scene_manager.js"></script>
 
@@ -19,6 +20,14 @@
             $(function() {
 
                 var mousePos = new THREE.Vector3(0, 0, 1);
+
+                Input.captureKeys([
+                    'LEFT_ARROW',
+                    'RIGHT_ARROW',
+                    'UP_ARROW',
+                    'DOWN_ARROW'
+                ]);
+                Input.bindKeys(window);
 
                 var sceneManager = new SceneManager({
                     "width": 900,
