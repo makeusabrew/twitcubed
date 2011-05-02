@@ -5,11 +5,15 @@ TweetModel = function(data) {
             _vz = 0,
             _rvx = 0,
             _rvy = 0,
-            _rvz = 0;
+            _rvz = 0,
+            _ax = 0,
+            _ay = 0,
+            _az = 0;
 
     return {
         init: function() {
             // balloon first
+            _ax = Math.random() * 360;
             var texture = new THREE.ImageUtils.loadTexture(data.user.profile_image_url);
             var geometry = new THREE.Sphere(40, 40, 40);
             var material = [
@@ -29,17 +33,15 @@ TweetModel = function(data) {
 
             // front placard
 
-            // rear placard
-
-            var x = document.createElement('canvas');
-            var xc = x.getContext('2d');
-            x.width = 150;
-            x.height = 50;
-            xc.fillStyle = '#ddd';
-            xc.font = '20px Helvetica';
-            var uWidth = xc.measureText(data.user.screen_name);
-            var offset = (150 - uWidth.width) / 2;
-            xc.fillText(data.user.screen_name, offset, 30);
+            var x = Utils.textToCanvas({
+                "text": data.text,
+                "colour": "#fff",
+                "fontHeight": 10,
+                "font": "Helvetica",
+                "wrap": true,
+                "width": 150,
+                "height": 50
+            });
             var texture = new THREE.Texture(x);
             var geometry = new THREE.Plane(150, 50);
             var xm = new THREE.MeshBasicMaterial({map:texture});
@@ -51,6 +53,32 @@ TweetModel = function(data) {
             ];
 
             _meshes.push(new THREE.Mesh(geometry, material));
+
+            // rear placard
+
+            x = Utils.textToCanvas({
+                "text": data.user.screen_name,
+                "colour": "#ddd",
+                "fontHeight": 20,
+                "font": "Helvetica",
+                "wrap": true,
+                "width": 150,
+                "height": 50
+            });
+
+            texture = new THREE.Texture(x);
+            geometry = new THREE.Plane(150, 50);
+            var xm = new THREE.MeshBasicMaterial({map:texture});
+            xm.map.needsUpdate = true;
+            material = [
+                new THREE.MeshBasicMaterial({map: new THREE.ImageUtils.loadTexture("/img/wood.jpg")}),
+                xm
+            ];
+
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.y = Utils.deg2rad(180.0);
+
+            _meshes.push(mesh);
         },
 
         setPosition: function(x, y, z) {
@@ -66,14 +94,19 @@ TweetModel = function(data) {
 
             // rear placard
             _meshes[2].position.x = x - 0;
-            _meshes[2].position.y = y - 100;
+            _meshes[2].position.y = y - 105;
             _meshes[2].position.z = z;
+
+            // front placard
+            _meshes[3].position.x = x - 0;
+            _meshes[3].position.y = y - 105;
+            _meshes[3].position.z = z-0.1;
         },
 
         setVelocity: function(vx, vy, vz) {
             _vx = vx;
             _vy = vy;
-            _vx = vz;
+            _vz = vz;
         },
 
         setRotationVelocity: function(vx, vy, vz) {
@@ -84,7 +117,7 @@ TweetModel = function(data) {
 
         move: function() {
             for (var i = 0; i < _meshes.length; i++) {
-                _meshes[i].position.x += _vx;
+                _meshes[i].position.x += Math.cos(_ax) * _vx;
                 _meshes[i].position.y += _vy;
                 _meshes[i].position.z += _vz;
 
@@ -92,6 +125,8 @@ TweetModel = function(data) {
                 _meshes[i].rotation.y += _rvy;
                 _meshes[i].rotation.z += _rvz;
             }
+
+            _ax += 0.01;
         },
 
         getMeshes: function() {

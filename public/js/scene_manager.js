@@ -10,9 +10,20 @@ SceneManager = function(options) {
 
     return {
         init: function() {
-            _camera = new THREE.Camera(50, _width / _height, 1, 10000);
+            //_camera = new THREE.Camera(50, _width / _height, 1, 10000);
+            _camera = new THREE.QuakeCamera({
+                fov: 90,
+                aspect: _width / _height,
+                near: 1,
+                far: 10000,
+                movementSpeed: 100,
+                lookSpeed: 0.1,
+                noFly: false,
+                lookVertical: true
+            });
 
             _scene = new THREE.Scene();
+            _scene.fog = new THREE.FogExp2(0xB3E4FF, 0.0008);
 
             _renderer = new THREE.WebGLRenderer({antialias: true});
 

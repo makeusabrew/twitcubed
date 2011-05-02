@@ -12,6 +12,7 @@
         <script src="/js/deps/Three.js"></script>
         <script src="/js/deps/RequestAnimationFrame.js"></script>
 
+        <script src="/js/utils.js"></script>
         <script src="/js/input.js"></script>
         <script src="/js/tweet_model.js"></script>
         <script src="/js/scene_manager.js"></script>
@@ -58,12 +59,15 @@
                     for (var i = 0; i < response.tweets.length; i++) {
                         var data = response.tweets[i];
                         var tweet = sceneManager.addTweet(data);
-                        var row = Math.floor(i / 8);
-                        var col = i % 8;
-                        tweet.setPosition(col*200, (-row)*225, 1);
+                        var row = Math.floor(i / 3);
+                        var col = i % 3;
+                        var x = col * ((Math.random()*100) + 250);
+                        var y = row * ((Math.random()*100) + 250) + (col*50);
+                        var z = -150 + (Math.random() * 300);
+                        tweet.setPosition(x, -y, z);
 
-                        var vx = Math.random() / 50;
-                        var vy = Math.random() / 50 + 0.1;
+                        var vx = Math.random() * 0.5;
+                        var vy = Math.random() / 30 + 0.08;
                         var ry = Math.random() / 100;
                         tweet.setVelocity(vx, vy, 0);
                         tweet.setRotationVelocity(0, ry, 0);
