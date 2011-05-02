@@ -2,6 +2,7 @@
 var express = require('express'),
     util = require('util'),
     RedisStore = require('connect-redis'),
+    redis = require('redis'),
 /* local dependencies */
     mongo = require(__dirname + '/../deps/mongodb/lib/mongodb'),
     io = require(__dirname + '/../deps/socketio/lib/socket.io'),
@@ -22,6 +23,12 @@ var oa = new OAuth(Config.twitter.request_url,
 );
 
 var app = express.createServer();
+
+var redisClient = redis.createClient();
+
+redisClient.on("error", function(err) {
+    util.log("Redis error: "+err);
+});
 
 /**
  * Config stuff
@@ -53,19 +60,26 @@ app.get('/tweets', function(req, res) {
     var msg = {};
     if (auth.isAuthed()) {
         util.debug('requesting user\'s timeline');
-        oa.get("http://api.twitter.com/1/statuses/friends_timeline.json?count=64&include_rts=1", auth.getToken(), auth.getSecret(), function(err, data) {
-            if (err) {
-                msg = {
-                    "success": false,
-                    "message": err
-                };
+        redisClient.get('tweets', function(err, obj) {
+            if (obj != null) {
+                res.send(JSON.parse(obj));
             } else {
-               msg = {
-                    "success": true,
-                    "tweets": JSON.parse(data)
-                };
+                oa.get("http://api.twitter.com/1/statuses/friends_timeline.json?count=64&include_rts=1", auth.getToken(), auth.getSecret(), function(err, data) {
+                    if (err) {
+                        msg = {
+                            "success": false,
+                            "message": err
+                        };
+                    } else {
+                       msg = {
+                            "success": true,
+                            "tweets": JSON.parse(data)
+                        };
+                    }
+                    redisClient.set('tweets', JSON.stringify(msg));
+                    res.send(msg);
+                });
             }
-            res.send(msg);
         });
     } else {
         msg = {

@@ -47,11 +47,11 @@
                 });
 
                 $.get("/tweets", {}, function(response) {
+                    console.log(response);
                     if (response.success == false) {
                         alert(response.message);
                         return;
                     }
-                    console.log(response);
 
                     console.log(response.tweets.length);
 
@@ -60,7 +60,13 @@
                         var tweet = sceneManager.addTweet(data);
                         var row = Math.floor(i / 8);
                         var col = i % 8;
-                        tweet.setPosition(col*75, (-row)*75, 1);
+                        tweet.setPosition(col*200, (-row)*225, 1);
+
+                        var vx = Math.random() / 50;
+                        var vy = Math.random() / 50 + 0.1;
+                        var ry = Math.random() / 100;
+                        tweet.setVelocity(vx, vy, 0);
+                        tweet.setRotationVelocity(0, ry, 0);
                     }
 
                     //sceneManager.animate();

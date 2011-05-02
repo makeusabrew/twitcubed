@@ -33,10 +33,16 @@ SceneManager = function(options) {
                 THREE.Collisions.colliders.push(THREE.CollisionUtils.MeshOBB(mesh));
             }
 
+            _tweets.push(tweet);
+
             return tweet;
         },
 
         render: function() {
+            for (var i = 0; i < _tweets.length; i++) {
+                _tweets[i].move();
+            }
+
             var r = new THREE.Ray();
             r.origin.copy(_mousePos);
             
@@ -48,11 +54,13 @@ SceneManager = function(options) {
 
             var c = THREE.Collisions.rayCastNearest(r);
 
+            /*
             if (c) {
                 //console.log(c);
                 c.mesh.rotation.y += 0.03;
                 c.mesh.rotation.x += 0.02;
             }
+            */
 
             if (Input.isKeyDown("UP_ARROW")) {
                 _camera.position.z --;
