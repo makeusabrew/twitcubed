@@ -11,7 +11,6 @@ SceneManager = function(options) {
     return {
         init: function() {
             _camera = new THREE.Camera(50, _width / _height, 1, 10000);
-            _camera.position.z = 700;
 
             _scene = new THREE.Scene();
 
@@ -64,6 +63,18 @@ SceneManager = function(options) {
 
         setMousePosition: function(mousePos) {
             _mousePos = mousePos;
+        },
+
+        setCameraPosition: function(x, y, z) {
+            _camera.position.x = x;
+            _camera.position.y = y;
+            _camera.position.z = z;
+        },
+
+        setCameraTarget: function(x, y, z) {
+            _camera.target.position.x = x;
+            _camera.target.position.y = y;
+            _camera.target.position.z = z;
         }
     };
 }

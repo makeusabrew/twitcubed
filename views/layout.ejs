@@ -18,15 +18,16 @@
         <script>
             $(function() {
 
+                var mousePos = new THREE.Vector3(0, 0, 1);
+
                 var sceneManager = new SceneManager({
                     "width": 900,
                     "height": 600
                 });
-                
-                var mousePos = new THREE.Vector3(0, 0, 1);
-
                 sceneManager.init();
                 sceneManager.setMousePosition(mousePos);
+                sceneManager.setCameraPosition(300, -200, 700);
+                sceneManager.setCameraTarget(300, -200, 1);
 
                 $("body").mousemove(function(e) {
                     e.preventDefault();
