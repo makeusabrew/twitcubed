@@ -12,10 +12,10 @@ SceneManager = function(options) {
         init: function() {
             //_camera = new THREE.Camera(50, _width / _height, 1, 10000);
             _camera = new THREE.QuakeCamera({
-                fov: 90,
+                fov: 50,
                 aspect: _width / _height,
                 near: 1,
-                far: 10000,
+                far: 5000,
                 movementSpeed: 100,
                 lookSpeed: 0.1,
                 noFly: false,
@@ -24,6 +24,8 @@ SceneManager = function(options) {
 
             _scene = new THREE.Scene();
             _scene.fog = new THREE.FogExp2(0xB3E4FF, 0.0008);
+
+            //_scene.addLight( new THREE.AmbientLight( 0x202020 ) );
 
             _renderer = new THREE.WebGLRenderer({antialias: true});
 
@@ -41,8 +43,11 @@ SceneManager = function(options) {
                 var mesh = meshes[i];
                 _scene.addObject(mesh);
                 _meshes.push(mesh);
-                THREE.Collisions.colliders.push(THREE.CollisionUtils.MeshOBB(mesh));
+                //THREE.Collisions.colliders.push(THREE.CollisionUtils.MeshOBB(mesh));
             }
+
+            var light = tweet.getLight();
+            //_scene.addLight(light);
 
             _tweets.push(tweet);
 
@@ -50,10 +55,11 @@ SceneManager = function(options) {
         },
 
         render: function() {
-            for (var i = 0; i < _tweets.length; i++) {
+            for (var i = 0, j = _tweets.length; i < j; i++) {
                 _tweets[i].move();
             }
 
+            /*
             var r = new THREE.Ray();
             r.origin.copy(_mousePos);
             
@@ -65,7 +71,6 @@ SceneManager = function(options) {
 
             var c = THREE.Collisions.rayCastNearest(r);
 
-            /*
             if (c) {
                 //console.log(c);
                 c.mesh.rotation.y += 0.03;
@@ -73,6 +78,7 @@ SceneManager = function(options) {
             }
             */
 
+            /*
             if (Input.isKeyDown("UP_ARROW")) {
                 _camera.position.z --;
             } else if (Input.isKeyDown("DOWN_ARROW")) {
@@ -84,9 +90,8 @@ SceneManager = function(options) {
             } else if (Input.isKeyDown("RIGHT_ARROW")) {
                 _camera.target.position.x ++;
             }
+            */
 
-            //_camera.target.position.x = x;
-            //_camera.target.position.y = y;
             _renderer.render(_scene, _camera);
 
         },

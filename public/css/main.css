@@ -3,6 +3,10 @@ html, body, canvas {
     margin:0;
 }
 
-body canvas {
-    border:1px solid black;
+body {
+    overflow:hidden;
+}
+
+canvas {
+    background:#222;
 }

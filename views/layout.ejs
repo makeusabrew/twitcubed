@@ -22,6 +22,7 @@
 
                 var mousePos = new THREE.Vector3(0, 0, 1);
 
+                /* not required for now - quake camera deals with this
                 Input.captureKeys([
                     'LEFT_ARROW',
                     'RIGHT_ARROW',
@@ -29,10 +30,11 @@
                     'DOWN_ARROW'
                 ]);
                 Input.bindKeys(window);
+                */
 
                 var sceneManager = new SceneManager({
-                    "width": 900,
-                    "height": 600
+                    "width": window.innerWidth,
+                    "height": window.innerHeight
                 });
                 sceneManager.init();
                 sceneManager.setMousePosition(mousePos);
@@ -43,7 +45,6 @@
                     e.preventDefault();
                     mousePos.x = e.clientX / sceneManager.getWidth() * 2 - 1;
                     mousePos.y = -(e.clientY / sceneManager.getHeight()) * 2 + 1;
-                    //console.log(e.clientX, e.clientY, mousePos.x, mousePos.y);
                     sceneManager.setMousePosition(mousePos);
                 });
 

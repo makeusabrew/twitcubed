@@ -1,23 +1,27 @@
 TweetModel = function(data) {
         var _meshes = [],
-            _vx = 0,
-            _vy = 0,
-            _vz = 0,
-            _rvx = 0,
-            _rvy = 0,
-            _rvz = 0,
-            _ax = 0,
-            _ay = 0,
-            _az = 0;
+            _x = y = z = 0,
+            _vx = _vy = _vz = 0,
+            _rvx = _rvy = _rvz = 0,
+            _ax =  _ay = _az = 0,
+            _colour,
+            _light;
 
     return {
         init: function() {
             // balloon first
-            _ax = Math.random() * 360;
-            var texture = new THREE.ImageUtils.loadTexture(data.user.profile_image_url);
-            var geometry = new THREE.Sphere(40, 40, 40);
+            //var texture = new THREE.ImageUtils.loadTexture(data.user.profile_image_url);
+            _colour = Math.floor(Math.random()*0xffffff);
+
+            // we don't need to keep hold of these so local variables will do
+            var geometry = new THREE.Sphere(50, 50, 50);
+            //var ambient = Math.floor(Math.random()*0xffffff);
+            var ambient = _colour;
+            //var specular = Math.floor(Math.random()*0xffffff);
+            var specular = _colour;
+            var shininess = Math.floor(Math.random()*0xffffff);
             var material = [
-                new THREE.MeshBasicMaterial({map:texture})
+				new THREE.MeshPhongMaterial( { ambient: ambient, color: _colour, specular: specular, shininess: shininess, shading: THREE.SmoothShading } )
             ];
             _meshes.push(new THREE.Mesh(geometry, material));
 
@@ -25,10 +29,10 @@ TweetModel = function(data) {
             var lGeometry = new THREE.Geometry();
 
             lGeometry.vertices.push(new THREE.Vertex({x:0,y:0, z:1}));
-            lGeometry.vertices.push(new THREE.Vertex({x:0,y:-40, z:1}));
-            lGeometry.vertices.push(new THREE.Vertex({x:0,y:-80, z:1}));
+            //lGeometry.vertices.push(new THREE.Vertex({x:0,y:-40, z:1}));
+            lGeometry.vertices.push(new THREE.Vertex({x:0,y:-150, z:1}));
 
-            var line = new THREE.Line(lGeometry, new THREE.LineBasicMaterial({color: 0xCC8523, linewidth:2}));
+            var line = new THREE.Line(lGeometry, new THREE.LineBasicMaterial({color: 0xCC8523, linewidth:3}));
             _meshes.push(line);
 
             // front placard
@@ -79,6 +83,13 @@ TweetModel = function(data) {
             mesh.rotation.y = Utils.deg2rad(180.0);
 
             _meshes.push(mesh);
+
+            // lighting
+
+            _light = new THREE.PointLight(_colour, 0.5);
+
+            // start at a random X angle
+            _ax = Math.random() * 360;
         },
 
         setPosition: function(x, y, z) {
@@ -94,13 +105,31 @@ TweetModel = function(data) {
 
             // rear placard
             _meshes[2].position.x = x - 0;
-            _meshes[2].position.y = y - 105;
+            _meshes[2].position.y = y - 175;
             _meshes[2].position.z = z;
 
             // front placard
             _meshes[3].position.x = x - 0;
-            _meshes[3].position.y = y - 105;
+            _meshes[3].position.y = y - 175;
             _meshes[3].position.z = z-0.1;
+
+            // light
+            _light.position.x = x;
+            _light.position.y = y + 60;
+            _light.position.z = z;
+
+            // local coords
+            _x = x;
+            _y = y;
+            _z = z;
+        },
+
+        getPosition: function() {
+            return {
+                x: _x,
+                y: _y,
+                z: _z
+            };
         },
 
         setVelocity: function(vx, vy, vz) {
@@ -126,23 +155,19 @@ TweetModel = function(data) {
                 _meshes[i].rotation.z += _rvz;
             }
 
+            _light.position.x += Math.cos(_ax) * _vx;
+            _light.position.y += _vy;
+            _light.position.z += _vz;
+
             _ax += 0.01;
         },
 
         getMeshes: function() {
             return _meshes;
+        },
+
+        getLight: function() {
+            return _light;
         }
     };
-
-    //mesh.position.z = row*30;
-    /*
-    var x = document.createElement('canvas');
-    var xc = x.getContext('2d');
-    x.width = 150;
-    x.height = 50;
-    xc.fillStyle = '#000';
-    xc.font = '20px helvetica';
-    xc.fillText(tweet.text, 0, 20);
-    var texture = new THREE.Texture(x);
-    */
 };
