@@ -51,7 +51,7 @@ TweetModel = function(data) {
             var xm = new THREE.MeshBasicMaterial({map:texture});
             xm.map.needsUpdate = true;
             var material = [
-                new THREE.MeshBasicMaterial({map:new THREE.ImageUtils.loadTexture("/img/wood.jpg")}),
+                new THREE.MeshBasicMaterial({map: data.woodTexture}),
                 xm
                 //new THREE.MeshBasicMaterial({color:0x000000, wireframe:true})
             ];
@@ -75,7 +75,7 @@ TweetModel = function(data) {
             var xm = new THREE.MeshBasicMaterial({map:texture});
             xm.map.needsUpdate = true;
             material = [
-                new THREE.MeshBasicMaterial({map: new THREE.ImageUtils.loadTexture("/img/wood.jpg")}),
+                new THREE.MeshBasicMaterial({map: data.woodTexture}),
                 xm
             ];
 

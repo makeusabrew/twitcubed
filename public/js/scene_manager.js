@@ -6,7 +6,8 @@ SceneManager = function(options) {
         _meshes = [],
         _width = options.width,
         _height = options.height,
-        _mousePos;
+        _mousePos,
+        _woodTexture;
 
     return {
         init: function() {
@@ -26,6 +27,7 @@ SceneManager = function(options) {
             _scene.fog = new THREE.FogExp2(0xB3E4FF, 0.0008);
 
             //_scene.addLight( new THREE.AmbientLight( 0x202020 ) );
+            _woodTexture = new THREE.ImageUtils.loadTexture("/img/wood.jpg")
 
             _renderer = new THREE.WebGLRenderer({antialias: true});
 
@@ -35,6 +37,7 @@ SceneManager = function(options) {
         },
 
         addTweet: function(data) {
+            data.woodTexture = _woodTexture;
             var tweet = new TweetModel(data);
             tweet.init();
 
@@ -118,6 +121,10 @@ SceneManager = function(options) {
             _camera.target.position.x = x;
             _camera.target.position.y = y;
             _camera.target.position.z = z;
+        },
+
+        getWoodTexture: function() {
+            return _woodTexture;
         }
     };
 }
